@@ -8,11 +8,13 @@ public class ModelUtils {
 	public static int interests;
 	public static int influencers;
 	public static int bots;
+	public static int nFollowersToBeInfluencer;
 	
 	public static void getParameters(Parameters params) {
 		agents = params.getInteger("agents");
 		interests = params.getInteger("dif_interests");
 		influencers = params.getInteger("influencers");
 		bots = params.getInteger("bots");
+		nFollowersToBeInfluencer = (agents * 5)/100;
 	}
 }

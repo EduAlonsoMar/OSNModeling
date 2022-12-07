@@ -1,10 +1,15 @@
 <repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.8.0">
-  <name>Count Output</name>
-  <dataSet>Agent Counts</dataSet>
+  <name>DataOutput</name>
+  <dataSet>OSN Data Set</dataSet>
   <delimiter>,</delimiter>
   <format>TABULAR</format>
   <sourceIds class="linked-hash-set">
-    <string>Agent</string>
+    <string>Believers</string>
+    <string>Susceptibles</string>
+    <string>Fact Checkers</string>
+    <string>Bots</string>
+    <string>Influencers</string>
+    <string>tick</string>
   </sourceIds>
   <fileName>ModelOutput.txt</fileName>
   <addTimeStamp>true</addTimeStamp>

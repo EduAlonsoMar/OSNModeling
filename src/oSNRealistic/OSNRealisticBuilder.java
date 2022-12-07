@@ -37,9 +37,6 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	
 	private ArrayList<ArrayList<Agent>> interests = new ArrayList<ArrayList<Agent>>();
 	private static final int pFollowInterest = 1; 
-	private ContinuousSpace<Object> space;
-	private Grid<Object> grid;
-	private Network<Object> net;
 	private Random random;
 
 	@Override
@@ -51,11 +48,12 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		
 		System.out.println("Context set id done");
 		
+		
 		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("OSN_network", context, true);
-		net = netBuilder.buildNetwork();
+		Network<Object> net = netBuilder.buildNetwork();
 		
 		ContinuousSpaceFactory spaceFactory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
-		space = spaceFactory.createContinuousSpace("space", 
+		ContinuousSpace<Object> space = spaceFactory.createContinuousSpace("space", 
 				context, 
 				new RandomCartesianAdder<Object>(), 
 				new repast.simphony.space.continuous.StickyBorders(), 
@@ -63,7 +61,7 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		
 		GridFactory gridFactory = GridFactoryFinder.createGridFactory(null);
 		
-		grid = gridFactory.createGrid("grid", context, 
+		Grid<Object> grid = gridFactory.createGrid("grid", context, 
 				new GridBuilderParameters<Object>(new StickyBorders(),
 						new SimpleGridAdder<Object>(),
 						true, 50, 50));
@@ -99,10 +97,10 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 		
 		createInterestsForAgents(context.getObjects(Agent.class));
-		createNetEdgesByProximity(context.getObjects(Agent.class));
-		createNetEdgestByInterest();
-		addInfluencers(context.getRandomObjects(Agent.class, ModelUtils.influencers).iterator(), ModelUtils.agents, context);
-		addBots(context.getObjects(Bot.class).iterator(), context);
+		createNetEdgesByProximity(context.getObjects(Agent.class), grid, net);
+		createNetEdgestByInterest(net);
+		addInfluencers(context.getRandomObjects(Agent.class, ModelUtils.influencers).iterator(), ModelUtils.agents, context, net);
+		addBots(context.getObjects(Bot.class).iterator(), context, net);
 		
 		
 		System.out.println("Saliendo");
@@ -123,7 +121,7 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	private void createNetEdgesByProximity(IndexedIterable<Object> agentsInContext) {
+	private void createNetEdgesByProximity(IndexedIterable<Object> agentsInContext, Grid<Object> grid, Network<Object> net) {
 		Iterator<Object> iterador = agentsInContext.iterator();
 		Agent tmp;
 		while (iterador.hasNext()) {
@@ -136,12 +134,12 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 			List<GridCell<Agent>> gridCells = nghCreator.getNeighborhood(true);
 			SimUtilities.shuffle(gridCells, RandomHelper.getUniform());
 			for (GridCell<Agent> cell : gridCells) {
-				addEdgesToAgentsInCell(cell, tmp);
+				addEdgesToAgentsInCell(cell, tmp, net);
 			}
 		}
 	}
 	
-	private void addEdgesToAgentsInCell(GridCell<Agent> cell, Agent node) {
+	private void addEdgesToAgentsInCell(GridCell<Agent> cell, Agent node, Network<Object> net) {
 		Iterator<Agent> iterator = cell.items().iterator();
 		while(iterator.hasNext()) {
 			Agent agent = iterator.next();
@@ -149,18 +147,18 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	private void createNetEdgestByInterest() {
+	private void createNetEdgestByInterest(Network<Object> net) {
 		int i;
 		int j;
 		for(i=0; i<interests.size(); i++) {
 			for (j=0; j<interests.get(i).size(); j++) {
-				createNetEdgeInList(interests.get(i).get(j), interests.get(i));
+				createNetEdgeInList(interests.get(i).get(j), interests.get(i), net);
 			}
 		}
 		
 	}
 	
-	private void createNetEdgeInList(Agent agent, ArrayList<Agent> list) {
+	private void createNetEdgeInList(Agent agent, ArrayList<Agent> list, Network<Object> net) {
 		Iterator<Agent> iterator = list.iterator();
 		Agent tmp;
 		while(iterator.hasNext()) {
@@ -171,7 +169,7 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	private void addInfluencers(Iterator<Object> influencers, int totalUsers, Context <Object> context) {
+	private void addInfluencers(Iterator<Object> influencers, int totalUsers, Context <Object> context, Network<Object> net) {
 		Agent influencer;
 		int i;
 		System.out.println("A total of " + (totalUsers*5)/100 + " followers will be added to the influencers");
@@ -184,16 +182,16 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	private void addBots(Iterator<Object> bots, Context<Object> context) {
+	private void addBots(Iterator<Object> bots, Context<Object> context, Network<Object> net) {
 		Bot tmp;
 		
 		while (bots.hasNext()) {
 			tmp = (Bot) bots.next();
-			addBotConnections(tmp, context);
+			addBotConnections(tmp, context, net);
 		}
 	}
 	
-	private void addBotConnections(Bot bot, Context<Object> context) {
+	private void addBotConnections(Bot bot, Context<Object> context, Network<Object> net) {
 		Iterator<Object> randomAgents = context.getRandomObjects(Agent.class, (ModelUtils.agents * 2 / 100)).iterator();
 		
 		while (randomAgents.hasNext()) {

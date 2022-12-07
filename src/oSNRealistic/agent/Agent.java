@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
+import oSNRealistic.ModelUtils;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.space.continuous.ContinuousSpace;
@@ -34,7 +35,9 @@ public class Agent {
 		this.recoveryRate = 0.2 + r.nextGaussian() * 0.04;
 		this.vulnerability = 0.5 + r.nextGaussian() * 0.04;
 		
-		System.out.println("Recovery rate for Agent is: " + this.recoveryRate + " and vulnerability: " + this.vulnerability );
+		if (r.nextDouble() < 0.25) {
+			this.feed.add(FeedType.FAKE_NEWS);
+		}
 	}
 	
 	public boolean isInfluencer() {
@@ -51,7 +54,19 @@ public class Agent {
 			count++;
 		}
 		
-		return count > 30;
+		return count > ModelUtils.nFollowersToBeInfluencer;
+	}
+	
+	public boolean isBeliever() {
+		return this.state == AgentState.BELIEVER;
+	}
+	
+	public boolean isSusceptible() {
+		return this.state == AgentState.SUSCEPTIBLE;
+	}
+	
+	public boolean isFactChecker() {
+		return this.state == AgentState.FACT_CHECKER;
 	}
 	
 	public void insertFeed(FeedType message) {
@@ -61,6 +76,12 @@ public class Agent {
 	
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step() {
+		
+		if (this.state == AgentState.FACT_CHECKER) {
+			shareMessage(FeedType.DEBUNKING);
+			return;
+		}
+		
 		if (this.feed.isEmpty()) {
 			if (this.state == AgentState.SUSCEPTIBLE) {
 				if (isAgentFactCheckerNow()) {

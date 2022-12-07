@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.8.0">
-  <name>Agent Counts</name>
+  <name>OSN Data Set</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,14 +11,50 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>1606642777</hashCode>
+    <hashCode>733800040</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Agent</string>
+      <string>Believers</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Agent</id>
+        <id>Believers</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isBeliever</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Susceptibles</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Susceptibles</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isSusceptible</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Fact Checkers</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Fact Checkers</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isFactChecker</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Bots</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Bots</id>
+        <className>oSNRealistic.agent.Bot</className>
+        <methodName>isBeliever</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Influencers</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Influencers</id>
         <className>oSNRealistic.agent.Agent</className>
         <methodName>isInfluencer</methodName>
         <aggType>SUM</aggType>
