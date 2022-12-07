@@ -3,6 +3,11 @@
 
 # Log file
 *.log
+*velocity.*
+ModelOutput.*
+.DS_Store
+
+
 
 # Package Files #
 *.jar
