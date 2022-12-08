@@ -10,13 +10,23 @@
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
+				<parameter name="work_with_time_dynamics" displayName="work_with_time_dynamics" type="boolean" 
+						defaultValue="false" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
+											/>
+				<parameter name="add_interests_connections" displayName="add_interests_connections" type="boolean" 
+						defaultValue="false" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
+											/>
 				<parameter name="influencers" displayName="Influencers" type="int" 
 						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="dif_interests" displayName="interests_numbers" type="int" 
-						defaultValue="25" 
+						defaultValue="100" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>

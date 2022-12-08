@@ -20,11 +20,11 @@ public class OSNAgentStyle extends DefaultStyleOGL2D {
         
         if (!a.isInfluencer()) {
         	if (a.getState() == AgentState.BELIEVER) {
-        		return Color.ORANGE;
+        		return Color.PINK;
         	} else if (a.getState() == AgentState.SUSCEPTIBLE) {
         		return Color.BLUE;
         	} else {
-        		return Color.GREEN;	
+        		return Color.DARK_GRAY;	
         	}            
         } else {
             return Color.YELLOW;

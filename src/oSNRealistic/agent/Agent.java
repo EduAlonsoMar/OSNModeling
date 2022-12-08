@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
+import bsh.This;
 import oSNRealistic.ModelUtils;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
@@ -26,6 +27,12 @@ public class Agent {
 	
 	private double recoveryRate;
 	private double vulnerability;
+	private double sharingRate;
+	
+	private boolean isConvinced = false;
+	
+	protected int timeAccess;
+	protected int tickCount;
 
 	public Agent(ContinuousSpace<Object> space, Grid<Object> grid) { 
 		this.space = space;
@@ -34,10 +41,11 @@ public class Agent {
 		r = new Random();
 		this.recoveryRate = 0.2 + r.nextGaussian() * 0.04;
 		this.vulnerability = 0.5 + r.nextGaussian() * 0.04;
+		this.sharingRate = 0.5 + r.nextGaussian() * 0.04;
+		this.timeAccess = 4;
 		
-		if (r.nextDouble() < 0.25) {
-			this.feed.add(FeedType.FAKE_NEWS);
-		}
+		this.tickCount = 0;
+		
 	}
 	
 	public boolean isInfluencer() {
@@ -76,37 +84,48 @@ public class Agent {
 	
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step() {
-		
-		if (this.state == AgentState.FACT_CHECKER) {
-			shareMessage(FeedType.DEBUNKING);
-			return;
-		}
-		
-		if (this.feed.isEmpty()) {
-			if (this.state == AgentState.SUSCEPTIBLE) {
-				if (isAgentFactCheckerNow()) {
-					this.state = AgentState.FACT_CHECKER;
-				}
-			}
-			
-			if (this.state == AgentState.BELIEVER) {
-				shareMessage(FeedType.FAKE_NEWS);
-			}
-			
+		tickCount++;
+		if (tickCount % timeAccess == 0) {
 			if (this.state == AgentState.FACT_CHECKER) {
 				shareMessage(FeedType.DEBUNKING);
 			}
-		} else {
-			FeedType message = this.feed.poll();
-			if (isAgentConvinced()) {
-				if (message == FeedType.FAKE_NEWS) { 
-					this.state = AgentState.BELIEVER;
-				} else {
+
+			if (this.state == AgentState.BELIEVER || this.state == AgentState.SUSCEPTIBLE) {
+				int i = 0;
+				while (!this.feed.isEmpty()) {
+					FeedType message = this.feed.poll();
+					if (isAgentConvinced()) {
+						if (message == FeedType.FAKE_NEWS) { 
+							i++;
+						} else {
+							i--;
+						}
+					}
+				}
+
+				if (i < 0) {
 					this.state = AgentState.FACT_CHECKER;
+				} else if (i>0) {
+					this.state = AgentState.BELIEVER;
+				}
+
+				if (this.state != AgentState.BELIEVER && !isConvinced) {
+					if (isAgentFactCheckerNow()) {
+						this.state = AgentState.FACT_CHECKER;
+					}
+				}
+
+
+				if (this.state == AgentState.BELIEVER) {
+					shareMessage(FeedType.FAKE_NEWS);
+				} else if (this.state == AgentState.FACT_CHECKER || isConvinced) {
+					shareMessage(FeedType.DEBUNKING);
 				}
 			}
-			
+
 		}
+		
+		isConvinced = false;
 		
 	}
 	
@@ -128,7 +147,10 @@ public class Agent {
 		Agent tmp;
 		while(targets.hasNext()) {
 			tmp = (Agent) targets.next().getTarget();
-			tmp.insertFeed(messageType);
+			if (r.nextDouble() < this.sharingRate) {
+				tmp.insertFeed(messageType);	
+			}
+			
 		}
 	}
 	

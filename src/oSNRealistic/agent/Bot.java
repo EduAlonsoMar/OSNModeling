@@ -23,14 +23,16 @@ public class Bot extends Agent {
 	@ScheduledMethod(start = 1, interval = 1)
 	@Override
 	public void step() {
-		
-		
-		@SuppressWarnings("unchecked")
-		Context<Object> context = ContextUtils.getContext(this);
-		@SuppressWarnings("unchecked")
-		Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
-		
-		spreadFakeNews(net.getOutEdges(this).iterator());
+		this.tickCount++;
+		if (tickCount % this.timeAccess == 0) {
+
+			@SuppressWarnings("unchecked")
+			Context<Object> context = ContextUtils.getContext(this);
+			@SuppressWarnings("unchecked")
+			Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
+
+			spreadFakeNews(net.getOutEdges(this).iterator());
+		}
 		
 		
 	}
