@@ -16,12 +16,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
 				<parameter name="add_interests_connections" displayName="add_interests_connections" type="boolean" 
-						defaultValue="false" 
+						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
 				<parameter name="influencers" displayName="Influencers" type="int" 
-						defaultValue="10" 
+						defaultValue="30" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>

@@ -1,5 +1,5 @@
 package oSNRealistic.agent;
 
 public enum AgentState {
-	SUSCEPTIBLE, BELIEVER, FACT_CHECKER
+	SUSCEPTIBLE, BELIEVER, FACT_CHECKER, BOT
 }

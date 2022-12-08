@@ -6,7 +6,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="bots" displayName="Bots" type="int" 
-						defaultValue="10" 
+						defaultValue="0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
@@ -21,7 +21,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
 				<parameter name="influencers" displayName="Influencers" type="int" 
-						defaultValue="10" 
+						defaultValue="0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>

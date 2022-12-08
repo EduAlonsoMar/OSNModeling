@@ -11,52 +11,52 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>733800040</hashCode>
+    <hashCode>2078756882</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Believers</string>
+      <string>Susceptible</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Believers</id>
-        <className>oSNRealistic.agent.Agent</className>
-        <methodName>isBeliever</methodName>
-        <aggType>SUM</aggType>
-      </repast.simphony.data2.engine.MethodDataSourceDefinition>
-    </entry>
-    <entry>
-      <string>Susceptibles</string>
-      <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Susceptibles</id>
+        <id>Susceptible</id>
         <className>oSNRealistic.agent.Agent</className>
         <methodName>isSusceptible</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
     <entry>
-      <string>Fact Checkers</string>
+      <string>Believer</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Fact Checkers</id>
+        <id>Believer</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isBeliever</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Fact_Checker</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Fact_Checker</id>
         <className>oSNRealistic.agent.Agent</className>
         <methodName>isFactChecker</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
     <entry>
-      <string>Bots</string>
+      <string>Influencer</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Bots</id>
-        <className>oSNRealistic.agent.Bot</className>
-        <methodName>isBeliever</methodName>
+        <id>Influencer</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isInfluencer</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
     <entry>
-      <string>Influencers</string>
+      <string>Bot</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Influencers</id>
+        <id>Bot</id>
         <className>oSNRealistic.agent.Agent</className>
-        <methodName>isInfluencer</methodName>
+        <methodName>isBot</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

@@ -4,11 +4,10 @@ import java.awt.Color;
 
 import oSNRealistic.agent.Agent;
 import oSNRealistic.agent.AgentState;
-import oSNRealistic.agent.Bot;
 import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.visualizationOGL2D.EdgeStyleOGL2D;
 
-public class BotEdgeStyle implements EdgeStyleOGL2D {
+public class OSNnetEdgeStyle implements EdgeStyleOGL2D {
 
 	@Override
 	public int getLineWidth(RepastEdge<?> edge) {
@@ -17,18 +16,14 @@ public class BotEdgeStyle implements EdgeStyleOGL2D {
 
 	@Override
 	public Color getColor(RepastEdge<?> edge) {
-		if (edge.getSource() instanceof Bot){
+		
+		Agent a = (Agent) edge.getSource();
+		if (a.getState() == AgentState.SUSCEPTIBLE) {
+			return Color.gray;
+		} else if (a.getState() == AgentState.BELIEVER || a.getState() == AgentState.BOT) {
 			return Color.RED;
 		} else {
-			Agent a = (Agent) edge.getSource();
-			if (a.getState() == AgentState.SUSCEPTIBLE) {
-				return Color.gray;
-			} else if (a.getState() == AgentState.BELIEVER) {
-				return Color.red;
-			} else {
-				return Color.GREEN;	
-			}
-				
+			return Color.GREEN;	
 		}
 		
 	}

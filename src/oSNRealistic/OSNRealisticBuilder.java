@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import oSNRealistic.agent.Agent;
-import oSNRealistic.agent.Bot;
+import oSNRealistic.agent.AgentState;
 import oSNRealistic.agent.FeedType;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
@@ -78,8 +78,11 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		}
 		
 		// Add the bots to our model
+		Agent bot;
 		for (i=0; i<ModelUtils.bots; i++) {
-			context.add(new Bot(space, grid));
+			bot = new Agent(space, grid);
+			bot.convertToBot();
+			context.add(bot);
 			
 		}
 		
@@ -102,17 +105,17 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 				interests.add(new ArrayList<Agent>());
 			}
 			createInterestsForAgents(context.getObjects(Agent.class), interests);
-			createNetEdgestByInterest(net, interests);
+			createNetEdgestByInterest(net, interests, grid);
 		}
 		
 		// Add the influencers to our network		
-		addInfluencers(context.getRandomObjects(Agent.class, ModelUtils.influencers).iterator(), ModelUtils.agents, context, net);
+		addInfluencers(context.getRandomObjects(Agent.class, ModelUtils.influencers).iterator(), ModelUtils.agents, context, net, grid);
 		
 		// Connect the bots randomly to agents in the network
-		addBots(context.getObjects(Bot.class).iterator(), context, net);
+		addBots(context.getObjects(Agent.class).iterator(), context, net);
 		
 		Agent firstInfected = (Agent) context.getRandomObjects(Agent.class, 1).iterator().next();
-		firstInfected.insertFeed(FeedType.FAKE_NEWS);
+		firstInfected.convertToBeliever();
 		
 		
 		return context;
@@ -156,7 +159,7 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 			List<GridCell<Agent>> gridCells = nghCreator.getNeighborhood(true);
 			SimUtilities.shuffle(gridCells, RandomHelper.getUniform());
 			for (GridCell<Agent> cell : gridCells) {
-				addEdgesToAgentsInCell(cell, tmp, net);
+				addEdgesToAgentsInCell(cell, tmp, net, grid);
 			}
 		}
 	}
@@ -167,12 +170,24 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param node
 	 * @param net
 	 */
-	private void addEdgesToAgentsInCell(GridCell<Agent> cell, Agent node, Network<Object> net) {
+	private void addEdgesToAgentsInCell(GridCell<Agent> cell, Agent node, Network<Object> net, Grid<Object> grid) {
 		Iterator<Agent> iterator = cell.items().iterator();
 		while(iterator.hasNext()) {
 			Agent agent = iterator.next();
-			net.addEdge(node, agent);
+			net.addEdge(node, agent, calculateWeight(node, agent, grid));
 		}
+	}
+	
+	private double calculateWeight(Agent agent1, Agent agent2, Grid<Object> grid) {
+		GridPoint pt1 = grid.getLocation(agent1);
+		GridPoint pt2 = grid.getLocation(agent2);
+		
+		double ac = Math.abs(pt2.getY() - pt1.getY());
+		double cb = Math.abs(pt2.getX() - pt1.getX());
+		
+		double distance = (Math.hypot(ac, cb)/Math.sqrt(2.0))/100;
+		
+		return (1-distance);
 	}
 	
 	/**
@@ -180,12 +195,12 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param net
 	 * @param interests
 	 */
-	private void createNetEdgestByInterest(Network<Object> net, ArrayList<ArrayList<Agent>> interests) {
+	private void createNetEdgestByInterest(Network<Object> net, ArrayList<ArrayList<Agent>> interests, Grid<Object> grid) {
 		int i;
 		int j;
 		for(i=0; i<interests.size(); i++) {
 			for (j=0; j<interests.get(i).size(); j++) {
-				createNetEdgeInList(interests.get(i).get(j), interests.get(i), net);
+				createNetEdgeInList(interests.get(i).get(j), interests.get(i), net, grid);
 			}
 		}
 		
@@ -197,13 +212,13 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param list
 	 * @param net
 	 */
-	private void createNetEdgeInList(Agent agent, ArrayList<Agent> list, Network<Object> net) {
+	private void createNetEdgeInList(Agent agent, ArrayList<Agent> list, Network<Object> net, Grid<Object> grid) {
 		Iterator<Agent> iterator = list.iterator();
 		Agent tmp;
 		while(iterator.hasNext()) {
 			tmp = iterator.next();
 			if (agent != tmp && random.ints(0,500).findFirst().getAsInt() < pFollowInterest) {
-				net.addEdge(agent, tmp);	
+				net.addEdge(agent, tmp, calculateWeight(agent, tmp, grid));	
 			}
 		}
 	}
@@ -216,15 +231,19 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param context
 	 * @param net
 	 */
-	private void addInfluencers(Iterator<Object> influencers, int totalUsers, Context <Object> context, Network<Object> net) {
+	private void addInfluencers(Iterator<Object> influencers, int totalUsers, Context <Object> context, Network<Object> net, Grid<Object> grid) {
 		Agent influencer;
 		int i;
 		System.out.println("A total of " + ModelUtils.nFollowersToBeInfluencer + " followers will be added to the influencers");
+		Iterator<Object> iteratorAgents = context.getRandomObjects(Agent.class, ModelUtils.nFollowersToBeInfluencer).iterator();
+		Agent agentForConnection;
 		while(influencers.hasNext()) {
 			influencer = (Agent) influencers.next();
-			for(i=0; i<ModelUtils.nFollowersToBeInfluencer; i++) {
-				net.addEdge(influencer, context.getRandomObject());
+			while(iteratorAgents.hasNext()) {
+				agentForConnection = (Agent) iteratorAgents.next();
+				net.addEdge(influencer, agentForConnection, calculateWeight(influencer, agentForConnection, grid));
 			}
+			
 			
 		}
 	}
@@ -236,11 +255,14 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param net
 	 */
 	private void addBots(Iterator<Object> bots, Context<Object> context, Network<Object> net) {
-		Bot tmp;
+		Agent tmp;
 		
 		while (bots.hasNext()) {
-			tmp = (Bot) bots.next();
-			addBotConnections(tmp, context, net);
+			tmp = (Agent) bots.next();
+			if (tmp.getState() == AgentState.BOT) {
+				addBotConnections(tmp, context, net);	
+			}
+			
 		}
 	}
 	
@@ -251,11 +273,11 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 	 * @param context
 	 * @param net
 	 */
-	private void addBotConnections(Bot bot, Context<Object> context, Network<Object> net) {
+	private void addBotConnections(Agent bot, Context<Object> context, Network<Object> net) {
 		Iterator<Object> randomAgents = context.getRandomObjects(Agent.class, ModelUtils.nConnectionsPerBot).iterator();
 		
 		while (randomAgents.hasNext()) {
-			net.addEdge(bot, (Agent) randomAgents.next());
+			net.addEdge(bot, (Agent) randomAgents.next(), 0.1);
 		}
 	}
 }

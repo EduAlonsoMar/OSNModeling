@@ -6,25 +6,17 @@
       <string>oSNRealistic.agent.Agent</string>
       <string>oSNRealistic.style.OSNAgentStyle</string>
     </entry>
-    <entry>
-      <string>oSNRealistic.agent.Bot</string>
-      <string>oSNRealistic.style.OSNBotStyle</string>
-    </entry>
   </styles>
   <editedStyles>
     <entry>
       <string>oSNRealistic.agent.Agent</string>
       <null/>
     </entry>
-    <entry>
-      <string>oSNRealistic.agent.Bot</string>
-      <null/>
-    </entry>
   </editedStyles>
   <netStyles>
     <entry>
       <string>OSN_network</string>
-      <string>oSNRealistic.style.BotEdgeStyle</string>
+      <string>oSNRealistic.style.OSNnetEdgeStyle</string>
     </entry>
   </netStyles>
   <editedNetStyles>
@@ -41,7 +33,7 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-1922060511</hashCode>
+    <hashCode>1078380433</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>space</layoutProjection>
@@ -49,10 +41,6 @@
   <layerOrder>
     <entry>
       <string>oSNRealistic.agent.Agent</string>
-      <int>1</int>
-    </entry>
-    <entry>
-      <string>oSNRealistic.agent.Bot</string>
       <int>0</int>
     </entry>
   </layerOrder>

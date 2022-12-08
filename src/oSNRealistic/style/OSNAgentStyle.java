@@ -23,6 +23,8 @@ public class OSNAgentStyle extends DefaultStyleOGL2D {
         		return Color.PINK;
         	} else if (a.getState() == AgentState.SUSCEPTIBLE) {
         		return Color.BLUE;
+        	} else if (a.getState() == AgentState.BOT) {
+        		return Color.RED;
         	} else {
         		return Color.DARK_GRAY;	
         	}            
