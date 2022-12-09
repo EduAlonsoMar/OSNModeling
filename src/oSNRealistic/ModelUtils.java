@@ -12,6 +12,8 @@ public class ModelUtils {
 	public static int nFollowersToBeInfluencer;
 	public static int nConnectionsPerBot;
 	public static boolean workWithTimeDynamics;
+	public static int timeAccessForCommonUsers;
+	public static int timeAccessForBots;
 	
 	public static void getParameters(Parameters params) {
 		agents = params.getInteger("agents");
@@ -22,5 +24,8 @@ public class ModelUtils {
 		createInterestsConnections = params.getBoolean("add_interests_connections");
 		workWithTimeDynamics = params.getBoolean("work_with_time_dynamics");
 		nConnectionsPerBot = (agents * 2) / 100;
+		timeAccessForCommonUsers = params.getInteger("time_access_for_users");
+		timeAccessForBots = params.getInteger("time_access_for_bots");
+		
 	}
 }

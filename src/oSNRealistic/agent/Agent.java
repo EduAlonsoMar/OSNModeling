@@ -28,8 +28,6 @@ public class Agent {
 	private double vulnerability;
 	private double sharingRate;
 	
-	private boolean isConvinced = false;
-	
 	protected int timeAccess;
 	protected int tickCount;
 
@@ -41,7 +39,10 @@ public class Agent {
 		this.recoveryRate = 0.2 + r.nextGaussian() * 0.04;
 		this.vulnerability = 0.5 + r.nextGaussian() * 0.04;
 		this.sharingRate = 0.5 + r.nextGaussian() * 0.04;
-		this.timeAccess = 4;
+		if (ModelUtils.workWithTimeDynamics) {
+			this.timeAccess = ModelUtils.timeAccessForCommonUsers;	
+		}
+		
 		
 		this.tickCount = 0;
 		
@@ -90,62 +91,65 @@ public class Agent {
 	
 	public void convertToBot() {
 		this.state = AgentState.BOT;
+		this.timeAccess = ModelUtils.timeAccessForBots;
 	}
 
+	private void executeAgentStep() {
+		if (this.state == AgentState.BOT){
+			@SuppressWarnings("unchecked")
+			Context<Object> context = ContextUtils.getContext(this);
+			@SuppressWarnings("unchecked")
+			Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
+			shareFakeNewsAsBot(net.getOutEdges(this).iterator());
+			
+		}
+		
+		if (this.state == AgentState.FACT_CHECKER) {
+			shareMessage(FeedType.DEBUNKING);
+		}
+
+		if (this.state == AgentState.BELIEVER || this.state == AgentState.SUSCEPTIBLE) {
+			int i = 0;
+			while (!this.feed.isEmpty()) {
+				FeedMessage message = this.feed.poll();
+				if (isAgentConvinced(message)) {
+					if (message.getType() == FeedType.FAKE_NEWS) { 
+						i++;
+					} else {
+						i--;
+					}
+				}
+			}
+
+			if (i < 0) {
+				this.state = AgentState.FACT_CHECKER;
+			} else if (i>0) {
+				this.state = AgentState.BELIEVER;
+			}
+
+			if (this.state != AgentState.BELIEVER) {
+				if (isAgentFactCheckerNow()) {
+					this.state = AgentState.FACT_CHECKER;
+				}
+			}
+
+
+			if (this.state == AgentState.BELIEVER) {
+				shareMessage(FeedType.FAKE_NEWS);
+			} else if (this.state == AgentState.FACT_CHECKER) {
+				shareMessage(FeedType.DEBUNKING);
+			}
+		}
+	}
 	
 	@ScheduledMethod(start = 1, interval = 1)
 	public void step() {
 		tickCount++;
-		if (tickCount % timeAccess == 0) {
-			if (this.state == AgentState.BOT){
-				@SuppressWarnings("unchecked")
-				Context<Object> context = ContextUtils.getContext(this);
-				@SuppressWarnings("unchecked")
-				Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
-				shareFakeNewsAsBot(net.getOutEdges(this).iterator());
-				
-			}
-			
-			if (this.state == AgentState.FACT_CHECKER) {
-				shareMessage(FeedType.DEBUNKING);
-			}
-
-			if (this.state == AgentState.BELIEVER || this.state == AgentState.SUSCEPTIBLE) {
-				int i = 0;
-				while (!this.feed.isEmpty()) {
-					FeedMessage message = this.feed.poll();
-					if (isAgentConvinced(message)) {
-						if (message.getType() == FeedType.FAKE_NEWS) { 
-							i++;
-						} else {
-							i--;
-						}
-					}
-				}
-
-				if (i < 0) {
-					this.state = AgentState.FACT_CHECKER;
-				} else if (i>0) {
-					this.state = AgentState.BELIEVER;
-				}
-
-				if (this.state != AgentState.BELIEVER && !isConvinced) {
-					if (isAgentFactCheckerNow()) {
-						this.state = AgentState.FACT_CHECKER;
-					}
-				}
-
-
-				if (this.state == AgentState.BELIEVER) {
-					shareMessage(FeedType.FAKE_NEWS);
-				} else if (this.state == AgentState.FACT_CHECKER || isConvinced) {
-					shareMessage(FeedType.DEBUNKING);
-				}
-			}
-
+		if (ModelUtils.workWithTimeDynamics && tickCount % timeAccess == 0) {
+			executeAgentStep();
+		} else if (!ModelUtils.workWithTimeDynamics) {
+			executeAgentStep();
 		}
-		
-		isConvinced = false;
 		
 	}
 	

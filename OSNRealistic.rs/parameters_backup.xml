@@ -6,12 +6,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="bots" displayName="Bots" type="int" 
-						defaultValue="0" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="work_with_time_dynamics" displayName="work_with_time_dynamics" type="boolean" 
-						defaultValue="false" 
+						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
@@ -21,12 +21,22 @@
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
 				<parameter name="influencers" displayName="Influencers" type="int" 
-						defaultValue="0" 
+						defaultValue="30" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+											/>
+				<parameter name="time_access_for_users" displayName="time_access_for_users" type="int" 
+						defaultValue="16" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="dif_interests" displayName="interests_numbers" type="int" 
-						defaultValue="100" 
+						defaultValue="500" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+											/>
+				<parameter name="time_access_for_bots" displayName="time_access_for_bots" type="int" 
+						defaultValue="2" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
