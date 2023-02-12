@@ -9,16 +9,12 @@ import java.util.Random;
 import oSNRealistic.ModelUtils;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.graph.RepastEdge;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.util.ContextUtils;
 
 public class Agent {
 	
-	private ContinuousSpace<Object> space;
-	private Grid<Object> grid;
 	private Random r;
 	private AgentState state = AgentState.SUSCEPTIBLE;
 	
@@ -31,14 +27,12 @@ public class Agent {
 	protected int timeAccess;
 	protected int tickCount;
 
-	public Agent(ContinuousSpace<Object> space, Grid<Object> grid) { 
-		this.space = space;
-		this.grid = grid;
+	public Agent() { 
 		this.feed = new PriorityQueue<FeedMessage>();
 		r = new Random();
-		this.recoveryRate = 0.2 + r.nextGaussian() * 0.04;
-		this.vulnerability = 0.5 + r.nextGaussian() * 0.04;
-		this.sharingRate = 0.5 + r.nextGaussian() * 0.04;
+		this.recoveryRate = ModelUtils.recoveryMean + r.nextGaussian() * ModelUtils.recoveryVariance;
+		this.vulnerability = ModelUtils.vulnerabilityMean + r.nextGaussian() * ModelUtils.vulnerabilityVariance;
+		this.sharingRate = ModelUtils.sharingMean + r.nextGaussian() * ModelUtils.sharingVariance;
 		if (ModelUtils.workWithTimeDynamics) {
 			this.timeAccess = ModelUtils.timeAccessForCommonUsers;	
 		}
@@ -128,7 +122,7 @@ public class Agent {
 			}
 
 			if (this.state != AgentState.BELIEVER) {
-				if (isAgentFactCheckerNow()) {
+				if (ModelUtils.fackCheckersConversion && isAgentFactCheckerNow()) {
 					this.state = AgentState.FACT_CHECKER;
 				}
 			}
@@ -155,7 +149,7 @@ public class Agent {
 	
 	private boolean isAgentFactCheckerNow() {
 		double random = r.nextDouble();
-		System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + random);
+		// System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + random);
 		return (random < this.recoveryRate);
 	}
 	
@@ -171,11 +165,22 @@ public class Agent {
 		
 		Context<Object> context = ContextUtils.getContext(this);
 		Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
-		weight = net.getEdge(message.getCreator(), this).getWeight();
+		
+		RepastEdge<Object> edge = net.getEdge(message.getCreator(), this);
+		if (edge == null) {
+			edge = net.getEdge(this, message.getCreator());
+		}
+		
+		if (edge != null) {
+			weight = net.getEdge(message.getCreator(), this).getWeight();	
+		} else {
+			weight = 1;
+		}
+		
 		
 		double random = r.nextDouble();
 		double vulnerability = this.vulnerability * k * weight;
-		System.out.println("random to check with vulnerability " + vulnerability + " is " + random);
+		// System.out.println("random to check with vulnerability " + vulnerability + " is " + random + " " + weight);
 		return (random < vulnerability);
 	}
 	
@@ -202,8 +207,13 @@ public class Agent {
 	
 	private void shareFakeNewsAsBot(Iterator<RepastEdge<Object>> targets) {
 		Agent tmp;
+		RepastEdge<Object> edge;
 		while(targets.hasNext()) {
-			tmp = (Agent) targets.next().getTarget();
+			edge = targets.next();
+			tmp = (Agent) edge.getTarget();
+			if (tmp.equals(this)) {
+				tmp = (Agent) edge.getSource();
+			} 
 			tmp.insertFeed(new FeedMessage(this, FeedType.FAKE_NEWS));
 		}
 	}
