@@ -17,22 +17,27 @@ public class Agent {
 	
 	private Random r;
 	private AgentState state = AgentState.SUSCEPTIBLE;
+	private boolean isSharingFakeNews = false;
 	
 	private Queue<FeedMessage> feed;
 	
 	private double recoveryRate;
 	private double vulnerability;
-	private double sharingRate;
+	private double sharingRateFakeNews;
+	private double sharingRateDebunking;
 	
 	protected int timeAccess;
 	protected int tickCount;
+	
+	protected int tickCountSinceLastConvertion;
 
 	public Agent() { 
 		this.feed = new PriorityQueue<FeedMessage>();
 		r = new Random();
-		this.recoveryRate = ModelUtils.recoveryMean + r.nextGaussian() * ModelUtils.recoveryVariance;
-		this.vulnerability = ModelUtils.vulnerabilityMean + r.nextGaussian() * ModelUtils.vulnerabilityVariance;
-		this.sharingRate = ModelUtils.sharingMean + r.nextGaussian() * ModelUtils.sharingVariance;
+		this.recoveryRate = ModelUtils.recoveryMean;// + r.nextGaussian() * ModelUtils.recoveryVariance;
+		this.vulnerability = ModelUtils.vulnerabilityMean;// + r.nextGaussian() * ModelUtils.vulnerabilityVariance;
+		this.sharingRateFakeNews = ModelUtils.sharingMean;// + r.nextGaussian() * ModelUtils.sharingVariance;
+		this.sharingRateDebunking = ModelUtils.sharingDebunking;// + r.nextGaussian() * ModelUtils.sharingVariance;
 		if (ModelUtils.workWithTimeDynamics) {
 			this.timeAccess = ModelUtils.timeAccessForCommonUsers;	
 		}
@@ -75,12 +80,20 @@ public class Agent {
 		return this.state == AgentState.BOT;
 	}
 	
+	public boolean isSharingFakeNews() {
+		return this.isSharingFakeNews;
+	}
+	
 	public void insertFeed(FeedMessage message) {
 		this.feed.add(message);
 	}
 	
 	public void convertToBeliever() {
 		this.state = AgentState.BELIEVER;
+	}
+	
+	public void convertToFactChecker() {
+		this.state = AgentState.FACT_CHECKER;
 	}
 	
 	public void convertToBot() {
@@ -94,7 +107,7 @@ public class Agent {
 			Context<Object> context = ContextUtils.getContext(this);
 			@SuppressWarnings("unchecked")
 			Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
-			shareFakeNewsAsBot(net.getOutEdges(this).iterator());
+			shareFakeNewsAsBot();
 			
 		}
 		
@@ -118,13 +131,21 @@ public class Agent {
 			if (i < 0) {
 				this.state = AgentState.FACT_CHECKER;
 			} else if (i>0) {
+				if (this.state == AgentState.SUSCEPTIBLE) {
+					this.tickCountSinceLastConvertion = 1;
+				} else {
+					this.tickCountSinceLastConvertion++;
+				}
 				this.state = AgentState.BELIEVER;
 			}
 
-			if (this.state != AgentState.BELIEVER) {
+			if (this.state == AgentState.SUSCEPTIBLE) {
 				if (ModelUtils.fackCheckersConversion && isAgentFactCheckerNow()) {
 					this.state = AgentState.FACT_CHECKER;
+					this.tickCountSinceLastConvertion = 1;
 				}
+			} else {
+				this.tickCountSinceLastConvertion++;
 			}
 
 
@@ -132,6 +153,8 @@ public class Agent {
 				shareMessage(FeedType.FAKE_NEWS);
 			} else if (this.state == AgentState.FACT_CHECKER) {
 				shareMessage(FeedType.DEBUNKING);
+			} else {
+				this.isSharingFakeNews = false;
 			}
 		}
 	}
@@ -143,13 +166,19 @@ public class Agent {
 			executeAgentStep();
 		} else if (!ModelUtils.workWithTimeDynamics) {
 			executeAgentStep();
+		} else if (this.state == AgentState.BOT) {
+
+			shareFakeNewsAsBot();
+		} else {
+			this.isSharingFakeNews = false;
 		}
 		
 	}
 	
 	private boolean isAgentFactCheckerNow() {
-		double random = r.nextDouble();
-		// System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + random);
+		double addedValue = (Double.valueOf(tickCount) / 1000);
+		double random = r.nextDouble() + addedValue;
+		// System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + random + ". Added value because of time is " + addedValue);
 		return (random < this.recoveryRate);
 	}
 	
@@ -158,9 +187,19 @@ public class Agent {
 		double k;
 		double weight;
 		if (message.getType() == FeedType.FAKE_NEWS) {
-			k = 1.0;
+			double progresiveTime;
+			if (ModelUtils.workWithTimeDynamics) { 
+				progresiveTime = Double.valueOf(this.tickCount) / Double.valueOf(ModelUtils.timeAccessForCommonUsers);
+			} else {
+				progresiveTime = Double.valueOf(this.tickCount);
+			}
+			if (progresiveTime < 35) {
+				k = 1.0;
+			} else {
+				k = 1.0 * (1.0/progresiveTime);	
+			}			
 		} else {
-			k = 0.1;
+			k = 0.5;
 		}
 		
 		Context<Object> context = ContextUtils.getContext(this);
@@ -184,8 +223,47 @@ public class Agent {
 		return (random < vulnerability);
 	}
 	
+	private boolean isAgentSharing(FeedType messageType) {
+		double random = r.nextDouble();
+		double sharingRate;
+
+		int progressiveTime = ModelUtils.workWithTimeDynamics ? ModelUtils.timeAccessForCommonUsers : 1;
+		double valuToAdjustTime;
+		
+		if (this.tickCountSinceLastConvertion <= ModelUtils.ticksToStartLosingInterest) {
+			valuToAdjustTime = 1.0;
+		} else {
+			valuToAdjustTime = (Double.valueOf(this.tickCountSinceLastConvertion - ModelUtils.ticksToStartLosingInterest) / progressiveTime) > 0 ? (Double.valueOf(this.tickCountSinceLastConvertion - 6) / progressiveTime) : 1;   
+		}
+		
+		 
+		// System.out.println("Ticks since last convertion " + this.tickCountSinceLastConvertion + " valuToAdjustTime: " + valuToAdjustTime);
+		
+		if (messageType == FeedType.FAKE_NEWS) {
+
+			sharingRate = this.sharingRateFakeNews * (1.0 / valuToAdjustTime);
+			
+		} else {
+			sharingRate = this.sharingRateDebunking * (1.0 / valuToAdjustTime);
+		}
+			// System.out.println("Sharing rate for " + messageType + " is " + sharingRate + " tick sincefirstconvertion " + this.tickCount + " random number " + random);		
+		return random < sharingRate;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void shareMessage(FeedType messageType) {
+		
+		if (!isAgentSharing(messageType)) {
+			this.isSharingFakeNews = false;
+			return;
+		}
+		
+		if (messageType == FeedType.FAKE_NEWS) {
+			// System.out.println("Sharing fake news");
+			this.isSharingFakeNews = true;	
+		} else {
+			this.isSharingFakeNews = false;
+		}
 		
 		Context<Object> context = ContextUtils.getContext(this);
 		Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
@@ -194,9 +272,7 @@ public class Agent {
 		Agent tmp;
 		while(targets.hasNext()) {
 			tmp = (Agent) targets.next().getTarget();
-			if (r.nextDouble() < this.sharingRate) {
-				tmp.insertFeed(new FeedMessage(this, messageType));	
-			}
+			tmp.insertFeed(new FeedMessage(this, messageType));
 			
 		}
 	}
@@ -205,7 +281,12 @@ public class Agent {
 		return this.state;
 	}
 	
-	private void shareFakeNewsAsBot(Iterator<RepastEdge<Object>> targets) {
+	private void shareFakeNewsAsBot() {
+		@SuppressWarnings("unchecked")
+		Context<Object> context = ContextUtils.getContext(this);
+		@SuppressWarnings("unchecked")
+		Network<Object> net = (Network<Object>) context.getProjection("OSN_network");
+		Iterator<RepastEdge<Object>> targets = net.getOutEdges(this).iterator();
 		Agent tmp;
 		RepastEdge<Object> edge;
 		while(targets.hasNext()) {

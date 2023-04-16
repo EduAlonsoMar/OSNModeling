@@ -15,6 +15,11 @@
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
+				<parameter name="sharing_debunking" displayName="Sharing Debunking" type="double" 
+						defaultValue="0.4" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+											/>
 				<parameter name="add_interests_connections" displayName="add_interests_connections" type="boolean" 
 						defaultValue="false" 
 						isReadOnly="false" 
@@ -26,20 +31,25 @@
 						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
 												values="Barabasi-Albert default "
 											/>
+				<parameter name="initial_fact_checkers" displayName="initial_fact_checers" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+											/>
 				<parameter name="recovery_mean" displayName="μ_recovery" type="double" 
-						defaultValue="0.1" 
+						defaultValue="0.02" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+											/>
+				<parameter name="number_steps" displayName="Number of total steps" type="int" 
+						defaultValue="100" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="factcheckers_conversion" displayName="Fact Checkers Conversion" type="boolean" 
 						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
-											/>
-				<parameter name="vulnerability_variance" displayName="σ^2_vulnerabitlity" type="double" 
-						defaultValue="0.04" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="time_access_for_users" displayName="time_access_for_users" type="int" 
 						defaultValue="4" 
@@ -66,15 +76,10 @@
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
-				<parameter name="sharing_variance" displayName="σ^2_sharing" type="double" 
-						defaultValue="0.04" 
+				<parameter name="ticks_lose_interest" displayName="Ticks to Start losing interest" type="int" 
+						defaultValue="6" 
 						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
-											/>
-				<parameter name="recovery_variance" displayName="σ^2_recovery" type="double" 
-						defaultValue="0.04" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="vulnerability_mean" displayName="μ-vulnerability" type="double" 
 						defaultValue="0.5" 
@@ -82,12 +87,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="sharing_mean" displayName="μ_sharing" type="double" 
-						defaultValue="0.5" 
+						defaultValue="0.75" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="work_with_time_dynamics" displayName="work_with_time_dynamics" type="boolean" 
-						defaultValue="true" 
+						defaultValue="false" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>

@@ -54,6 +54,7 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 		TopologyGenerator generator = new TopologyGenerator(context, space, grid);
 		generator.generateSelectedTopology();
 		
+		RunEnvironment.getInstance().endAt(ModelUtils.numberOfTicks);
 		return context;
 	
 	}	

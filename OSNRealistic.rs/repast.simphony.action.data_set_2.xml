@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.8.0">
-  <name>OSN DataSet</name>
+  <name>CompleteDataSet</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,25 +11,34 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>465662535</hashCode>
+    <hashCode>1327443015</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Believer</string>
+      <string>believers</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Believer</id>
+        <id>believers</id>
         <className>oSNRealistic.agent.Agent</className>
         <methodName>isBeliever</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
     <entry>
-      <string>Fact_Checker</string>
+      <string>factCheckers</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Fact_Checker</id>
+        <id>factCheckers</id>
         <className>oSNRealistic.agent.Agent</className>
         <methodName>isFactChecker</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>believersSharing</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>believersSharing</id>
+        <className>oSNRealistic.agent.Agent</className>
+        <methodName>isSharingFakeNews</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

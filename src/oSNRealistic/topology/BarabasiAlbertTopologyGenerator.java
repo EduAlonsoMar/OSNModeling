@@ -56,9 +56,9 @@ public class BarabasiAlbertTopologyGenerator extends TopologyCreator {
 		for (Object obj : context) {
 			NdPoint pt = space.getLocation(obj);
 			if (grid.moveTo(obj, (int)pt.getX(), (int)pt.getY())) {
-				System.out.println("Object moved in the grid");
+				// System.out.println("Object moved in the grid");
 			} else {
-				System.out.println("Objcet not moved in the grid");
+				// System.out.println("Objcet not moved in the grid");
 			}
 			
 		}
@@ -70,6 +70,13 @@ public class BarabasiAlbertTopologyGenerator extends TopologyCreator {
 		while (agents.hasNext()) {
 			believer = (Agent) agents.next();
 			believer.convertToBeliever();
+		}
+		
+		Agent factChecker;
+		Iterator<Object> agentsFC = context.getRandomObjects(Agent.class, ModelUtils.numberOfInitialFactCheckers).iterator();
+		while (agentsFC.hasNext()) {
+			factChecker = (Agent) agentsFC.next();
+			factChecker.convertToFactChecker();
 		}
 	}
 	
@@ -89,13 +96,13 @@ public class BarabasiAlbertTopologyGenerator extends TopologyCreator {
 				node = (Agent) nodes.next();
 				pi = calculateProbability(node);
 				double randomNumber = randomNumberBetweenMargins(0, 1);
-				System.out.println("Random prob. Number: " + randomNumber);
+				// System.out.println("Random prob. Number: " + randomNumber);
 				if (randomNumber <= pi) {
 					net.addEdge(node, tmp);
 					nodeDegree++;
 				}
 			}
-			System.out.println("Added " + nodeDegree + " edges to the net");
+			// System.out.println("Added " + nodeDegree + " edges to the net");
 		}
 	}
 	
@@ -130,7 +137,7 @@ public class BarabasiAlbertTopologyGenerator extends TopologyCreator {
 		double ki = ((Integer) net.getDegree(node)).doubleValue();
 		double kj = ((Integer) net.getDegree()).doubleValue();
 		double pi = (ki/kj);
-		System.out.println("ki/kj = " + ki + "/" + kj + "= " + pi);
+		// System.out.println("ki/kj = " + ki + "/" + kj + "= " + pi);
 		
 		// System.out.println("probability: " + pi);
 		return pi;

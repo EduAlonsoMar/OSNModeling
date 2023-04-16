@@ -22,12 +22,16 @@ public class ModelUtils {
 	public static int nodeEdgesInBarabasi;
 	public static boolean fackCheckersConversion;
 	public static int numberOfInitialBeleivers;
+	public static int numberOfInitialFactCheckers;
 	public static double vulnerabilityMean;
-	public static double vulnerabilityVariance;
 	public static double recoveryMean;
-	public static double recoveryVariance;
 	public static double sharingMean;
-	public static double sharingVariance;
+	public static int numberOfTicks;
+	public static double sharingDebunking;
+	public static int ticksToStartLosingInterest;
+	
+	
+	public static int configId;
 	
 	
 	
@@ -48,12 +52,13 @@ public class ModelUtils {
 		initialNodesInBarabasi = params.getInteger("initial_nodes_in_barabasi");
 		nodeEdgesInBarabasi = params.getInteger("node_edges_in_barabasi");
 		numberOfInitialBeleivers = params.getInteger("initial_believers");
+		numberOfInitialFactCheckers = params.getInteger("initial_fact_checkers");
 		vulnerabilityMean = params.getDouble("vulnerability_mean");
-		vulnerabilityVariance = params.getDouble("vulnerability_variance");
 		recoveryMean = params.getDouble("recovery_mean");
-		recoveryVariance = params.getDouble("recovery_variance");
 		sharingMean = params.getDouble("sharing_mean");
-		sharingVariance = params.getDouble("sharing_variance");
+		numberOfTicks = params.getInteger("number_steps");
+		sharingDebunking = params.getDouble("sharing_debunking");
+		ticksToStartLosingInterest = params.getInteger("ticks_lose_interest");
 		
 		
 	}
