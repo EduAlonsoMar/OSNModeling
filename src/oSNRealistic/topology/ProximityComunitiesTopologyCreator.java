@@ -1,12 +1,10 @@
 package oSNRealistic.topology;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import oSNRealistic.ModelUtils;
-import oSNRealistic.agent.Agent;
-import oSNRealistic.agent.AgentState;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.query.space.grid.GridCell;
@@ -25,8 +23,34 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	private static final int pFollowInterest = 10;
 	private Network<Object> net;
 	
-	public ProximityComunitiesTopologyCreator(Context <Object> context, ContinuousSpace<Object> space, Grid<Object> grid) {
-		super(context, space, grid);
+	private int totalNodes;
+	private boolean createInterestsConnections;
+	private int numberOfInterests;
+	private int numberOfInfluencers;
+	private int nFollwersToBeInfluencer;
+	private int nConnectionsPerBot;
+	
+	@SuppressWarnings("rawtypes")
+	public ProximityComunitiesTopologyCreator(
+			Context <Object> context, 
+			ContinuousSpace<Object> space, 
+			Grid<Object> grid, 
+			Class agentClass,
+			String convertToBotMethod,
+			int totalNodes,
+			boolean createInterests,
+			int numberOfInterests,
+			int numberOfInfluencers,
+			int nFollowersToBeInfluencer,
+			int nBots,
+			int nConnectionPerBot) {
+		super(context, space, grid, agentClass, convertToBotMethod, totalNodes, nBots);
+		this.totalNodes = totalNodes;
+		this.createInterestsConnections = createInterests;
+		this.numberOfInterests = numberOfInterests;
+		this.numberOfInfluencers = numberOfInfluencers;
+		this.nFollwersToBeInfluencer = nFollowersToBeInfluencer;
+		this.nConnectionsPerBot = nConnectionPerBot;
 		
 		// Create the net of our Online Social Network
 		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("OSN_network", context, true);
@@ -34,6 +58,7 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createTopology() {
 		super.createTopology();
@@ -41,17 +66,13 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 		int i;
 		
 		// Add the common agents to our model
-		for (i = 0; i < ModelUtils.agents; i++) {
-			context.add(new Agent());
-			
-		}
-		
-		// Add the bots to our model
-		Agent bot;
-		for (i=0; i<ModelUtils.bots; i++) {
-			bot = new Agent();
-			bot.convertToBot();
-			context.add(bot);
+		for (i = 0; i < this.totalNodes; i++) {
+			try {
+				context.add(this.agentClass.getDeclaredConstructor().newInstance());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
 			
 		}
 		
@@ -63,37 +84,30 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 			if (grid.moveTo(obj, (int)pt.getX(), (int)pt.getY())) {
 				// System.out.println("Object moved in the grid"); 
 			} else {
-				System.out.println("Objcet not moved in the grid");
+				System.err.println("Objcet not moved in the grid");
 			}
 			
 		}
 		
-		createNetEdgesByProximity(context.getObjects(Agent.class));
+		createNetEdgesByProximity(context.getObjects(Object.class));
 		
 		// Add the connections based in interests if necessary
-		if (ModelUtils.createInterestsConnections) {
-			ArrayList<ArrayList<Agent>> interests = new ArrayList<ArrayList<Agent>>();
+		if (this.createInterestsConnections) {
+			ArrayList<ArrayList<Object>> interests = new ArrayList<ArrayList<Object>>();
 			// Adds as many lists of agents as the parameter says
 			// The more high is the number of interests, less connections will be between users
-			for (i = 0; i < ModelUtils.interests; i++) {
-				interests.add(new ArrayList<Agent>());
+			for (i = 0; i < this.numberOfInterests; i++) {
+				interests.add(new ArrayList<Object>());
 			}
-			createInterestsForAgents(context.getObjects(Agent.class), interests);
+			createInterestsForAgents(context.getObjects(Object.class), interests);
 			createNetEdgestByInterest(interests);
 		}
 		
 		// Add the influencers to our network		
-		addInfluencers(context.getRandomObjects(Agent.class, ModelUtils.influencers).iterator(), ModelUtils.agents);
+		addInfluencers(context.getRandomObjects(Object.class, this.numberOfInfluencers).iterator(), this.totalNodes);
 		
 		// Connect the bots randomly to agents in the network
-		addBots(context.getObjects(Agent.class).iterator());
-		
-		Iterator<Object> iterator = context.getRandomObjects(Agent.class, ModelUtils.numberOfInitialBeleivers).iterator();
-		Agent firstInfected;
-		while (iterator.hasNext()) {
-			firstInfected = (Agent) iterator.next();
-			firstInfected.convertToBeliever();
-		}	
+		addBots();	
 		
 	}
 	
@@ -103,14 +117,14 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param agentsInContext
 	 * @param interests
 	 */
-	private void createInterestsForAgents(IndexedIterable<Object> agentsInContext, ArrayList<ArrayList<Agent>> interests) {
+	private void createInterestsForAgents(IndexedIterable<Object> agentsInContext, ArrayList<ArrayList<Object>> interests) {
 		
 		Iterator<Object> iterador = agentsInContext.iterator();
-		Agent tmp;
+		Object tmp;
 		int interest;
 		while (iterador.hasNext()) {
-			tmp = (Agent) iterador.next();
-			interest = random.ints(0, ModelUtils.interests).findFirst().getAsInt();
+			tmp = iterador.next();
+			interest = random.ints(0, this.numberOfInterests).findFirst().getAsInt();
 			interests.get(interest).add(tmp);
 		}
 	}
@@ -123,9 +137,9 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 */
 	private void createNetEdgesByProximity(IndexedIterable<Object> agentsInContext) {
 		Iterator<Object> iterador = agentsInContext.iterator();
-		Agent tmp;
+		Object tmp;
 		while (iterador.hasNext()) {
-			tmp = (Agent) iterador.next();
+			tmp = iterador.next();
 			GridPoint pt = grid.getLocation(tmp);
 			if (pt == null) {
 				System.out.println("Object not in grid");
@@ -134,11 +148,11 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 
 				// use the GridCellNgh class to create GridCells for
 				// the surrounding neighborhood.
-				GridCellNgh<Agent> nghCreator = new GridCellNgh<Agent>(grid, pt, Agent.class, 1, 1);
+				GridCellNgh<Object> nghCreator = new GridCellNgh<Object>(grid, pt, Object.class, 1, 1);
 				// import preast.simphony.query.space.grid.GridCell
-				List<GridCell<Agent>> gridCells = nghCreator.getNeighborhood(true);
+				List<GridCell<Object>> gridCells = nghCreator.getNeighborhood(true);
 				SimUtilities.shuffle(gridCells, RandomHelper.getUniform());
-				for (GridCell<Agent> cell : gridCells) {
+				for (GridCell<Object> cell : gridCells) {
 					addEdgesToAgentsInCell(cell, tmp);
 				}
 			}
@@ -151,15 +165,15 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param node
 	 * @param net
 	 */
-	private void addEdgesToAgentsInCell(GridCell<Agent> cell, Agent node) {
-		Iterator<Agent> iterator = cell.items().iterator();
+	private void addEdgesToAgentsInCell(GridCell<Object> cell, Object node) {
+		Iterator<Object> iterator = cell.items().iterator();
 		while(iterator.hasNext()) {
-			Agent agent = iterator.next();
+			Object agent = iterator.next();
 			net.addEdge(node, agent, calculateWeight(node, agent));
 		}
 	}
 	
-	private double calculateWeight(Agent agent1, Agent agent2) {
+	private double calculateWeight(Object agent1, Object agent2) {
 		GridPoint pt1 = grid.getLocation(agent1);
 		GridPoint pt2 = grid.getLocation(agent2);
 		
@@ -176,7 +190,7 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param net
 	 * @param interests
 	 */
-	private void createNetEdgestByInterest(ArrayList<ArrayList<Agent>> interests) {
+	private void createNetEdgestByInterest(ArrayList<ArrayList<Object>> interests) {
 		int i;
 		int j;
 		for(i=0; i<interests.size(); i++) {
@@ -193,9 +207,9 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param list
 	 * @param net
 	 */
-	private void createNetEdgeInList(Agent agent, ArrayList<Agent> list) {
-		Iterator<Agent> iterator = list.iterator();
-		Agent tmp;
+	private void createNetEdgeInList(Object agent, ArrayList<Object> list) {
+		Iterator<Object> iterator = list.iterator();
+		Object tmp;
 		while(iterator.hasNext()) {
 			tmp = iterator.next();
 			if (agent != tmp && random.ints(0,500).findFirst().getAsInt() < pFollowInterest) {
@@ -213,14 +227,14 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param net
 	 */
 	private void addInfluencers(Iterator<Object> influencers, int totalUsers) {
-		Agent influencer;
-		System.out.println("A total of " + ModelUtils.nFollowersToBeInfluencer + " followers will be added to the influencers");
-		Iterator<Object> iteratorAgents = context.getRandomObjects(Agent.class, ModelUtils.nFollowersToBeInfluencer).iterator();
-		Agent agentForConnection;
+		Object influencer;
+		System.out.println("A total of " + this.nFollwersToBeInfluencer + " followers will be added to the influencers");
+		Iterator<Object> iteratorAgents = context.getRandomObjects(Object.class, this.nFollwersToBeInfluencer).iterator();
+		Object agentForConnection;
 		while(influencers.hasNext()) {
-			influencer = (Agent) influencers.next();
+			influencer = influencers.next();
 			while(iteratorAgents.hasNext()) {
-				agentForConnection = (Agent) iteratorAgents.next();
+				agentForConnection = iteratorAgents.next();
 				net.addEdge(influencer, agentForConnection, calculateWeight(influencer, agentForConnection));
 			}
 			
@@ -228,23 +242,25 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 		}
 	}
 	
-	/**
-	 * Adds the bots to the network.
-	 * @param bots
-	 * @param context
-	 * @param net
-	 */
-	private void addBots(Iterator<Object> bots) {
-		Agent tmp;
-		
-		while (bots.hasNext()) {
-			tmp = (Agent) bots.next();
-			if (tmp.getState() == AgentState.BOT) {
-				addBotConnections(tmp);	
+	
+	@SuppressWarnings({ "unchecked" })
+	private void addBots() {
+		// Add the bots to our model
+		Object bot;
+		int i;
+		for (i=0; i < this.numberOfBots; i++) {
+			try {
+				bot = this.agentClass.getDeclaredConstructor().newInstance();
+				this.agentClass.getDeclaredMethod(this.convertToBotMethod).invoke(bot);
+				context.add(bot);
+				addBotConnections(bot);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException | InstantiationException e) {
+				e.printStackTrace();
 			}
-			
 		}
 	}
+
 	
 	/**
 	 * Adds the connections for a bot in the network. Gets a random list of the population 
@@ -253,11 +269,11 @@ public class ProximityComunitiesTopologyCreator extends TopologyCreator{
 	 * @param context
 	 * @param net
 	 */
-	private void addBotConnections(Agent bot) {
-		Iterator<Object> randomAgents = context.getRandomObjects(Agent.class, ModelUtils.nConnectionsPerBot).iterator();
+	private void addBotConnections(Object bot) {
+		Iterator<Object> randomAgents = context.getRandomObjects(Object.class, this.nConnectionsPerBot).iterator();
 		
 		while (randomAgents.hasNext()) {
-			net.addEdge(bot, (Agent) randomAgents.next(), 0.1);
+			net.addEdge(bot, randomAgents.next(), 0.1);
 		}
 	}
 }

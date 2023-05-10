@@ -13,11 +13,28 @@ public class TopologyCreator {
 	protected ContinuousSpace<Object> space;
 	protected Grid<Object> grid;
 	protected Random random;
+	@SuppressWarnings("rawtypes")
+	protected Class agentClass;
+	protected String convertToBotMethod;
+	protected int totalNodes;
+	protected int numberOfBots;
 	
-	public TopologyCreator(Context <Object> context, ContinuousSpace<Object> space, Grid<Object> grid) {
+	@SuppressWarnings("rawtypes")
+	public TopologyCreator(
+			Context <Object> context, 
+			ContinuousSpace<Object> space, 
+			Grid<Object> grid, 
+			Class agentClass,
+			String convertToBotMethod,
+			int totalNodes,
+			int numberOfBots) {
 		this.context = context;
 		this.space = space;
 		this.grid = grid;
+		this.agentClass = agentClass;
+		this.convertToBotMethod = convertToBotMethod;
+		this.totalNodes = totalNodes;
+		this.numberOfBots = numberOfBots;
 		
 		// Initialize the random object to work with.	
 		random = new Random();
