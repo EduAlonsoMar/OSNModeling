@@ -17,19 +17,17 @@ public class OSNAgentStyle extends DefaultStyleOGL2D {
         } else {
             return Color.BLACK;
         }
-        
-        if (!a.isInfluencer()) {
-        	if (a.getState() == AgentState.BELIEVER) {
-        		return Color.PINK;
-        	} else if (a.getState() == AgentState.SUSCEPTIBLE) {
-        		return Color.BLUE;
-        	} else if (a.getState() == AgentState.BOT) {
-        		return Color.RED;
-        	} else {
-        		return Color.DARK_GRAY;	
-        	}            
-        } else {
+
+        if (a.getState() == AgentState.BELIEVER) {
+            return Color.PINK;
+        } else if (a.getState() == AgentState.BOT) {
+            return Color.RED;
+        } else if (a.isInfluencer()) {
             return Color.YELLOW;
+        } else if (a.getState() == AgentState.SUSCEPTIBLE) {
+            return Color.BLUE;
+        } else {
+            return Color.DARK_GRAY;
         }
     }
 

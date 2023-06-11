@@ -99,5 +99,18 @@ public class OSNRealisticBuilder implements ContextBuilder<Object> {
 			factChecker.convertToFactChecker();
 		}
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void addBots(Context context) {
+		Agent bot;
+		System.out.println("A total of " + ModelUtils.bots + " will be added");
+		Iterator<Object> agentsFC = context.getRandomObjects(Agent.class, ModelUtils.bots).iterator();
+		while (agentsFC.hasNext()) {
+			bot = (Agent) agentsFC.next();
+			bot.convertToBot();
+		}
+	}
+	
+	
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameters>
 					<parameter name="bots" displayName="Bots" type="int" 
-						defaultValue="10" 
+						defaultValue="200" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
@@ -16,7 +16,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="sharing_debunking" displayName="Sharing Debunking" type="double" 
-						defaultValue="0.4" 
+						defaultValue="0.05" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
@@ -26,7 +26,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>
 				<parameter name="topology" displayName="topolgy" type="java.lang.String" 
-						defaultValue="Barabasi-Albert" 
+						defaultValue="default" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$StringStringConverter"
 												values="Barabasi-Albert default "
@@ -37,12 +37,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="recovery_mean" displayName="μ_recovery" type="double" 
-						defaultValue="0.02" 
+						defaultValue="0.01" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="number_steps" displayName="Number of total steps" type="int" 
-						defaultValue="100" 
+						defaultValue="400" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
@@ -67,7 +67,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="agents" displayName="Agents" type="int" 
-						defaultValue="1000" 
+						defaultValue="2000" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
@@ -82,17 +82,17 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 											/>
 				<parameter name="vulnerability_mean" displayName="μ-vulnerability" type="double" 
-						defaultValue="0.5" 
+						defaultValue="0.25" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="sharing_mean" displayName="μ_sharing" type="double" 
-						defaultValue="0.75" 
+						defaultValue="0.01" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 											/>
 				<parameter name="work_with_time_dynamics" displayName="work_with_time_dynamics" type="boolean" 
-						defaultValue="false" 
+						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 											/>

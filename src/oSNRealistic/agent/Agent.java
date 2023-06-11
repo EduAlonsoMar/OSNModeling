@@ -176,24 +176,28 @@ public class Agent {
 	}
 	
 	private boolean isAgentFactCheckerNow() {
-		double addedValue = (Double.valueOf(tickCount) / 1000);
-		double random = r.nextDouble() + addedValue;
-		// System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + random + ". Added value because of time is " + addedValue);
-		return (random < this.recoveryRate);
+		double addedValue = (Double.valueOf(tickCount) / 750);
+		double random = r.nextDouble();
+		if (tickCount > 16) {
+			random = random * Math.log(Double.valueOf(tickCount/8)); 
+		}
+		// System.out.println("random to check with recovery rate " + this.recoveryRate + " is " + Math.abs(random) + ". Added value because of time is " + addedValue);
+		return (Math.abs(random) < this.recoveryRate);
 	}
 	
 	@SuppressWarnings("unchecked")
 	private boolean isAgentConvinced(FeedMessage message) {
 		double k;
 		double weight;
+		double progresiveTime;
+		if (ModelUtils.workWithTimeDynamics) { 
+			progresiveTime = (Double.valueOf(this.tickCount) / Double.valueOf(ModelUtils.timeAccessForCommonUsers)) / 8;
+		} else {
+			progresiveTime = Double.valueOf(this.tickCount) / 8;
+		}
 		if (message.getType() == FeedType.FAKE_NEWS) {
-			double progresiveTime;
-			if (ModelUtils.workWithTimeDynamics) { 
-				progresiveTime = Double.valueOf(this.tickCount) / Double.valueOf(ModelUtils.timeAccessForCommonUsers);
-			} else {
-				progresiveTime = Double.valueOf(this.tickCount);
-			}
-			if (progresiveTime < 35) {
+
+			if (progresiveTime < 1) {
 				k = 1.0;
 			} else {
 				k = 1.0 * (1.0/progresiveTime);	
